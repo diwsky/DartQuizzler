@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:quizzler/quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 QuizBrain quizBrain = new QuizBrain();
 
@@ -45,6 +46,19 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
+  checkAnswer(bool correctAnswer, BuildContext context) {
+    setState(() {
+      scoreAnswer.add(
+        quizBrain.getAnswer() == correctAnswer
+            ? RightAnswers()
+            : WrongAnswers(),
+      );
+      if (!quizBrain.nextQuestion()) {
+        showAlert(context);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -82,14 +96,7 @@ class _QuizPageState extends State<QuizPage> {
               ),
               onPressed: () {
                 //The user picked true.
-                setState(() {
-                  scoreAnswer.add(
-                    quizBrain.getAnswer() == true
-                        ? RightAnswers()
-                        : WrongAnswers(),
-                  );
-                  quizBrain.nextQuestion();
-                });
+                checkAnswer(true, context);
               },
             ),
           ),
@@ -107,15 +114,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                setState(() {
-                  scoreAnswer.add(
-                    quizBrain.getAnswer() == false
-                        ? RightAnswers()
-                        : WrongAnswers(),
-                  );
-                  quizBrain.nextQuestion();
-                });
-                //The user picked false.
+                checkAnswer(false, context);
               },
             ),
           ),
@@ -125,6 +124,18 @@ class _QuizPageState extends State<QuizPage> {
         )
       ],
     );
+  }
+
+  Future<void> showAlert(BuildContext context) async {
+    await Alert(
+            context: context,
+            title: 'Congratulation!',
+            desc: 'You already finished the quiz!')
+        .show();
+    setState(() {
+      scoreAnswer = [];
+      quizBrain.resetQuestion();
+    });
   }
 }
 
